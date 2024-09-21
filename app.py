@@ -7,7 +7,8 @@ urls = ['https://books.toscrape.com/', 'https://books.toscrape.com/catalogue/pag
 
 def extract_data():
     spider = Async_spider_functions()
-    df = asyncio.run(spider.aiohttp_http(urls))
+    loop = asyncio.new_event_loop()
+    df =loop.run_until_complete(spider.aiohttp_http(urls))
     return df
 
 

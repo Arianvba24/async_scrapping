@@ -3,7 +3,6 @@ from requests_html import HTMLSession
 import pandas as pd
 import re
 import asyncio
-from playwright.async_api import async_playwright
 import json
 import httpx
 

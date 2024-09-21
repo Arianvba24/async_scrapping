@@ -6,6 +6,7 @@ import asyncio
 import aiohttp
 from playwright.async_api import async_playwright
 import json
+import httpx
 
 def buscar_numero(text):
     # pass
@@ -467,6 +468,54 @@ class Async_spider_functions():
 
             df = pd.DataFrame(final_data)
 
+            return df
+
+
+    async def fetch_httpx_html(self, client, url):
+        """
+        Esta función se ejecuta asincrónicamente en cada URL proporcionada
+        en la función `aiohttp_http()`. Utiliza httpx para obtener el HTML.
+        """
+        response = await client.get(url)
+        return response.text, url
+
+    async def httpx_http(self, urls):
+        """
+        Esta función devuelve una lista de archivos HTML guardados en una lista llamada 'titles',
+        que se recuperan de manera asíncrona. Funciona solo si tenemos una lista de URLs.
+        """
+        async with httpx.AsyncClient() as client:
+            # Crear las tareas asíncronas para cada URL
+            tasks = [self.fetch_html(client, url) for url in urls]
+            titles = await asyncio.gather(*tasks)
+
+            title_data = []
+            price_data = []
+            url_data = []
+
+            # Analiza el HTML y extrae los datos
+            for html, url in titles:
+                soup = BeautifulSoup(html, "lxml")
+                data = soup.find_all("li", class_="col-xs-6 col-sm-4 col-md-3 col-lg-3")
+
+                for p in data:
+                    title = p.h3.a.text
+                    price = p.find("p", class_="price_color").text
+
+                    title_data.append(title)
+                    price_data.append(price.strip())  # Limpiar el precio
+                    url_data.append(url)
+
+                    print(f"{title} | {price.strip()} | {url}")
+
+            # Crear un DataFrame con los datos extraídos
+            final_data = {
+                "Title": title_data,
+                "Price": price_data,
+                "Url": url_data
+            }
+
+            df = pd.DataFrame(final_data)
             return df
 
             

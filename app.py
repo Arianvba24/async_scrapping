@@ -1,42 +1,35 @@
 import streamlit as st
-from spider import *
+import aiohttp
+import asyncio
 
 
-urls = ['https://books.toscrape.com/', 'https://books.toscrape.com/catalogue/page-2.html', 'https://books.toscrape.com/catalogue/page-3.html', 'https://books.toscrape.com/catalogue/page-4.html', 'https://books.toscrape.com/catalogue/page-5.html', 'https://books.toscrape.com/catalogue/page-6.html', 'https://books.toscrape.com/catalogue/page-7.html', 'https://books.toscrape.com/catalogue/page-8.html', 'https://books.toscrape.com/catalogue/page-9.html', 'https://books.toscrape.com/catalogue/page-10.html', 'https://books.toscrape.com/catalogue/page-11.html', 'https://books.toscrape.com/catalogue/page-12.html', 'https://books.toscrape.com/catalogue/page-13.html', 'https://books.toscrape.com/catalogue/page-14.html', 'https://books.toscrape.com/catalogue/page-15.html', 'https://books.toscrape.com/catalogue/page-16.html', 'https://books.toscrape.com/catalogue/page-17.html', 'https://books.toscrape.com/catalogue/page-18.html', 'https://books.toscrape.com/catalogue/page-19.html', 'https://books.toscrape.com/catalogue/page-20.html', 'https://books.toscrape.com/catalogue/page-21.html', 'https://books.toscrape.com/catalogue/page-22.html', 'https://books.toscrape.com/catalogue/page-23.html', 'https://books.toscrape.com/catalogue/page-24.html', 'https://books.toscrape.com/catalogue/page-25.html', 'https://books.toscrape.com/catalogue/page-26.html', 'https://books.toscrape.com/catalogue/page-27.html', 'https://books.toscrape.com/catalogue/page-28.html', 'https://books.toscrape.com/catalogue/page-29.html', 'https://books.toscrape.com/catalogue/page-30.html', 'https://books.toscrape.com/catalogue/page-31.html', 'https://books.toscrape.com/catalogue/page-32.html', 'https://books.toscrape.com/catalogue/page-33.html', 'https://books.toscrape.com/catalogue/page-34.html', 'https://books.toscrape.com/catalogue/page-35.html', 'https://books.toscrape.com/catalogue/page-36.html', 'https://books.toscrape.com/catalogue/page-37.html', 'https://books.toscrape.com/catalogue/page-38.html', 'https://books.toscrape.com/catalogue/page-39.html', 'https://books.toscrape.com/catalogue/page-40.html', 'https://books.toscrape.com/catalogue/page-41.html', 'https://books.toscrape.com/catalogue/page-42.html', 'https://books.toscrape.com/catalogue/page-43.html', 'https://books.toscrape.com/catalogue/page-44.html', 'https://books.toscrape.com/catalogue/page-45.html', 'https://books.toscrape.com/catalogue/page-46.html', 'https://books.toscrape.com/catalogue/page-47.html', 'https://books.toscrape.com/catalogue/page-48.html', 'https://books.toscrape.com/catalogue/page-49.html',"https://books.toscrape.com/catalogue/page-50.html"]
+async def fetch(session, url):
+    try:
+        async with session.get(url) as response:
+            result = await response.json()
+            return result
+    except Exception:
+        return {}
 
 
-def extract_data():
-    spider = Async_spider_functions()
+async def main():
+    st.set_page_config(page_title="Example App", page_icon="🤖")
+    st.title("Get Image by Id")
+    async with aiohttp.ClientSession() as session:
+        with st.form("my_form"):
+            index = st.number_input("ID", min_value=0, max_value=100, key="index")
+
+            submitted = st.form_submit_button("Submit")
+
+            if submitted:
+                st.write("Result")
+                data = await fetch(session, f"https://picsum.photos/id/{index}/info")
+                if data:
+                    st.image(data['download_url'], caption=f"Author: {data['author']}")
+                else:
+                    st.error("Error")
+
+
+if __name__ == '__main__':
     loop = asyncio.new_event_loop()
-    df =loop.run_until_complete(spider.aiohttp_http(urls))
-    return df
-
-
-
-
-
-
-
-
-def main():
-    st.title("Hola mundo")
-    value = st.button("Click me to scrape")
-    if value:
-        st.dataframe(extract_data())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-if __name__=="__main__":
-    main()
+    loop.run_until_complete(main())
